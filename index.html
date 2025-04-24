@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Whack-a-Square</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{font-family:-apple-system, BlinkMacSystemFont, sans-serif;text-align:center;margin:0;padding:0;background:#fafafa;}
+#game{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:600px;margin:20px auto;}
+.square{background:#ccc;padding-top:100%;position:relative;border-radius:8px;cursor:pointer;transition:background 0.2s;}
+.square.active{background:#4caf50;}
+.square.disabled{pointer-events:none;opacity:0.4;}
+#score,#time{font-size:1.4rem;margin:10px;}
+button{font-size:1.2rem;padding:10px 20px;border:none;border-radius:8px;background:#007aff;color:#fff;cursor:pointer;}
+button:active{opacity:0.8;}
+</style>
+</head>
+<body>
+<h1>Whack‑a‑Square</h1>
+<p id="time">残り: 30 秒</p>
+<p id="score">スコア: 0</p>
+<div id="game"></div>
+<button id="startBtn">スタート</button>
+
+<script>
+const gameEl = document.getElementById('game');
+const scoreEl = document.getElementById('score');
+const timeEl = document.getElementById('time');
+const startBtn = document.getElementById('startBtn');
+
+let squares = [];
+let score = 0;
+let timeLeft = 30;
+let activeIndex = -1;
+let timerInterval;
+let moleInterval;
+
+function createGrid(){
+    gameEl.innerHTML = '';
+    squares=[];
+    for(let i=0;i<9;i++){
+        const div=document.createElement('div');
+        div.className='square';
+        div.addEventListener('click',()=>hit(i));
+        gameEl.appendChild(div);
+        squares.push(div);
+    }
+}
+
+function hit(index){
+    if(index===activeIndex){
+        score++;
+        scoreEl.textContent='スコア: '+score;
+        deactivate();
+    }
+}
+
+function activate(){
+    deactivate();
+    activeIndex=Math.floor(Math.random()*9);
+    squares[activeIndex].classList.add('active');
+}
+
+function deactivate(){
+    if(activeIndex>-1){
+        squares[activeIndex].classList.remove('active');
+        activeIndex=-1;
+    }
+}
+
+function startGame(){
+    score=0;
+    timeLeft=30;
+    scoreEl.textContent='スコア: 0';
+    timeEl.textContent='残り: 30 秒';
+    startBtn.disabled=true;
+    createGrid();
+    activate();
+    moleInterval=setInterval(activate,700);
+    timerInterval=setInterval(()=>{
+        timeLeft--;
+        timeEl.textContent='残り: '+timeLeft+' 秒';
+        if(timeLeft<=0){
+            endGame();
+        }
+    },1000);
+}
+
+function endGame(){
+    clearInterval(timerInterval);
+    clearInterval(moleInterval);
+    deactivate();
+    squares.forEach(sq=>sq.classList.add('disabled'));
+    startBtn.disabled=false;
+    alert('ゲーム終了！あなたのスコア: '+score);
+}
+
+createGrid();
+startBtn.addEventListener('click',startGame);
+</script>
+</body>
+</html>
